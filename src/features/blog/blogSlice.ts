@@ -54,17 +54,22 @@ const blogSlicer = createSlice({
   name: "blog",
   initialState,
   reducers: {
-    post: (state, action: PayloadAction<AddPost>) => {
-      const newPost: Post = {
-        ...action.payload,
-        id: nanoid(),
-        joy: 0,
-        like: 0,
-        look: 0,
-        rocket: 0,
-      };
-
-      state.posts = [...state.posts, newPost];
+    post: {
+      reducer: (state, action: PayloadAction<Post>) => {
+        state.posts.push(action.payload);
+      },
+      prepare: (post: AddPost): { payload: Post } => {
+        return {
+          payload: {
+            ...post,
+            id: nanoid(),
+            joy: 0,
+            like: 0,
+            rocket: 0,
+            look: 0,
+          },
+        };
+      },
     },
     edit: (state, action: PayloadAction<EditPost>) => {
       const { id, ...newPost } = action.payload;

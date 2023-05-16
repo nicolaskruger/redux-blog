@@ -6,7 +6,7 @@ import Link from "next/link";
 export const Blog = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [author, setAuthor] = useState("");
+  const [author, setAuthor] = useState("nicolas");
 
   const postList = useSelector(selectPost);
 
