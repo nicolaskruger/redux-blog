@@ -1,6 +1,7 @@
 import { PayloadAction, createSlice, nanoid } from "@reduxjs/toolkit";
 import { AppState } from "../../store";
 import { selectUserById, selectUserMap } from "../user/userSlicer";
+import { parseISO, formatDistanceToNow } from "date-fns";
 
 export type Post = {
   id: string;
@@ -109,17 +110,10 @@ const blogSlicer = createSlice({
 
 export const { post, edit, react } = blogSlicer.actions;
 
-const differenceInMinutes = (a: string, b: string) => {
-  const dateA = new Date(a);
-  const dateB = new Date(b);
+const differenceBetweenNow = (timestamp: string) => {
+  const date = parseISO(timestamp);
 
-  const diff = dateA.getTime() - dateB.getTime();
-
-  const diffMin = Math.round(((diff % 86400000) % 3600000) / 60000);
-
-  if (diffMin < 1) return "post less than one minute";
-
-  return `post ${diffMin} ago`;
+  return `${formatDistanceToNow(date)} ago`;
 };
 export const selectPost = (state: AppState) => {
   const userMap = selectUserMap(state);
@@ -127,7 +121,7 @@ export const selectPost = (state: AppState) => {
   return state.blog.posts.map(
     (post): ViewPost => ({
       ...post,
-      date: differenceInMinutes(new Date().toISOString(), post.date),
+      date: differenceBetweenNow(post.date),
       authorName: userMap[post.authorId]?.name,
     })
   );
@@ -140,7 +134,7 @@ export const selectPostId = (id: string) => (state: AppState) => {
 
   const postView: ViewPost = {
     ...post,
-    date: differenceInMinutes(new Date().toISOString(), post.date),
+    date: differenceBetweenNow(post.date),
     authorName: selectUserById(post!.id).name,
   };
 
