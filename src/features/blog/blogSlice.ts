@@ -1,15 +1,20 @@
 import { PayloadAction, createSlice, nanoid } from "@reduxjs/toolkit";
 import { AppState } from "../../store";
+import { selectUserById, selectUserMap } from "../user/userSlicer";
 
 export type Post = {
   id: string;
   title: string;
   content: string;
-  author: string;
+  authorId: string;
   like: number;
   rocket: number;
   joy: number;
   look: number;
+};
+
+export type ViewPost = Omit<Post, "authorId"> & {
+  authorName: string;
 };
 
 type Blog = {
@@ -26,7 +31,7 @@ const initialState: Blog = {
       joy: 0,
       look: 0,
       rocket: 0,
-      author: "Nícolas Krüger",
+      authorId: "0",
     },
     {
       id: "2",
@@ -36,12 +41,12 @@ const initialState: Blog = {
       joy: 0,
       look: 0,
       rocket: 0,
-      author: "Nícolas Krüger",
+      authorId: "1",
     },
   ],
 };
 
-type AddPost = Pick<Post, "title" | "author" | "content">;
+type AddPost = Pick<Post, "title" | "authorId" | "content">;
 
 type EditPost = Pick<Post, "id" | "title" | "content">;
 
@@ -100,9 +105,27 @@ const blogSlicer = createSlice({
 
 export const { post, edit, react } = blogSlicer.actions;
 
-export const selectPost = (state: AppState) => state.blog.posts;
+export const selectPost = (state: AppState) => {
+  const userMap = selectUserMap(state);
 
-export const selectPostId = (id: string) => (state: AppState) =>
-  state.blog.posts.find((post) => post.id === id);
+  return state.blog.posts.map(
+    (post): ViewPost => ({
+      ...post,
+      authorName: userMap[post.authorId]?.name,
+    })
+  );
+};
 
+export const selectPostId = (id: string) => (state: AppState) => {
+  const post = state.blog.posts.find((post) => post.id === id);
+
+  if (!post) return null;
+
+  const postView: ViewPost = {
+    ...post,
+    authorName: selectUserById(post!.id).name,
+  };
+
+  return postView;
+};
 export default blogSlicer.reducer;

@@ -1,14 +1,17 @@
 import { FormEvent, useState } from "react";
-import { Post, post, react, selectPost } from "./blogSlice";
+import { Post, ViewPost, post, react, selectPost } from "./blogSlice";
 import { useDispatch, useSelector } from "react-redux";
 import Link from "next/link";
+import { selectUsers } from "../user/userSlicer";
 
 export const Blog = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [author, setAuthor] = useState("nicolas");
+  const [author, setAuthor] = useState("0");
 
   const postList = useSelector(selectPost);
+
+  const users = useSelector(selectUsers);
 
   const dispatch = useDispatch();
 
@@ -16,14 +19,20 @@ export const Blog = () => {
     event.preventDefault();
     event.stopPropagation();
     if (title && content && author) {
-      dispatch(post({ title, content, author }));
+      dispatch(post({ title, content, authorId: author }));
       setTitle("");
       setContent("");
       setAuthor("");
     }
   };
 
-  const renderPost = ({ id, content, title, author, ...post }: Post) => {
+  const renderPost = ({
+    id,
+    content,
+    title,
+    authorName: author,
+    ...post
+  }: ViewPost) => {
     const reactions: (keyof Pick<Post, "joy" | "like" | "look" | "rocket">)[] =
       ["joy", "like", "look", "rocket"];
 
@@ -71,10 +80,9 @@ export const Blog = () => {
           value={author}
           onChange={(e) => setAuthor(e.target.value)}
         >
-          <option value="nicolas">nicolas</option>
-          <option value="ana">ana</option>
-          <option value="morcego">morcego</option>
-          <option value="jett">jett</option>
+          {users.map(({ name, id }) => (
+            <option value={id}>{name}</option>
+          ))}
         </select>
         <button>post</button>
       </form>

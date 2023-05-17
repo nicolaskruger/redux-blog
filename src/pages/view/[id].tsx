@@ -14,7 +14,16 @@ const View: NextPage<ViewProps> = ({ id }) => {
   const dispatch = useDispatch();
 
   if (post) {
-    const { author, content, id, joy, like, look, title, rocket } = post;
+    const {
+      authorName: author,
+      content,
+      id,
+      joy,
+      like,
+      look,
+      title,
+      rocket,
+    } = post;
 
     const reactions: (keyof Pick<Post, "joy" | "like" | "look" | "rocket">)[] =
       ["joy", "like", "look", "rocket"];
