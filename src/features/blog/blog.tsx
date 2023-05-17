@@ -22,7 +22,7 @@ export const Blog = () => {
       dispatch(post({ title, content, authorId: author }));
       setTitle("");
       setContent("");
-      setAuthor("");
+      setAuthor("0");
     }
   };
 
@@ -31,6 +31,7 @@ export const Blog = () => {
     content,
     title,
     authorName: author,
+    date,
     ...post
   }: ViewPost) => {
     const reactions: (keyof Pick<Post, "joy" | "like" | "look" | "rocket">)[] =
@@ -39,7 +40,9 @@ export const Blog = () => {
     return (
       <li key={title}>
         <h1>{title}</h1>
-        <h2>{author}</h2>
+        <h2>
+          by {author} {date}
+        </h2>
         <p>{content}</p>
         <Link href={`/view/${id}`}>view</Link>
         <ul>

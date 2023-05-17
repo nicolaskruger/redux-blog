@@ -23,6 +23,7 @@ const View: NextPage<ViewProps> = ({ id }) => {
       look,
       title,
       rocket,
+      date,
     } = post;
 
     const reactions: (keyof Pick<Post, "joy" | "like" | "look" | "rocket">)[] =
@@ -31,7 +32,9 @@ const View: NextPage<ViewProps> = ({ id }) => {
     return (
       <div key={title}>
         <h1>{title}</h1>
-        <h2>{author}</h2>
+        <h2>
+          by {author} {date}
+        </h2>
         <p>{content}</p>
         <ul>
           {reactions.map((reaction) => (

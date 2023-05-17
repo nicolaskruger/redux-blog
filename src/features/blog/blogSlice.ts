@@ -11,6 +11,7 @@ export type Post = {
   rocket: number;
   joy: number;
   look: number;
+  date: string;
 };
 
 export type ViewPost = Omit<Post, "authorId"> & {
@@ -32,6 +33,7 @@ const initialState: Blog = {
       look: 0,
       rocket: 0,
       authorId: "0",
+      date: new Date(new Date().getTime() - 5 * 60000).toISOString(),
     },
     {
       id: "2",
@@ -42,6 +44,7 @@ const initialState: Blog = {
       look: 0,
       rocket: 0,
       authorId: "1",
+      date: new Date(new Date().getTime() - 10 * 60000).toISOString(),
     },
   ],
 };
@@ -72,6 +75,7 @@ const blogSlicer = createSlice({
             like: 0,
             rocket: 0,
             look: 0,
+            date: new Date().toISOString(),
           },
         };
       },
@@ -105,12 +109,25 @@ const blogSlicer = createSlice({
 
 export const { post, edit, react } = blogSlicer.actions;
 
+const differenceInMinutes = (a: string, b: string) => {
+  const dateA = new Date(a);
+  const dateB = new Date(b);
+
+  const diff = dateA.getTime() - dateB.getTime();
+
+  const diffMin = Math.round(((diff % 86400000) % 3600000) / 60000);
+
+  if (diffMin < 1) return "post less than one minute";
+
+  return `post ${diffMin} ago`;
+};
 export const selectPost = (state: AppState) => {
   const userMap = selectUserMap(state);
 
   return state.blog.posts.map(
     (post): ViewPost => ({
       ...post,
+      date: differenceInMinutes(new Date().toISOString(), post.date),
       authorName: userMap[post.authorId]?.name,
     })
   );
@@ -123,6 +140,7 @@ export const selectPostId = (id: string) => (state: AppState) => {
 
   const postView: ViewPost = {
     ...post,
+    date: differenceInMinutes(new Date().toISOString(), post.date),
     authorName: selectUserById(post!.id).name,
   };
 
