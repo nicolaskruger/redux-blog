@@ -118,13 +118,15 @@ const differenceBetweenNow = (timestamp: string) => {
 export const selectPost = (state: AppState) => {
   const userMap = selectUserMap(state);
 
-  return state.blog.posts.map(
-    (post): ViewPost => ({
-      ...post,
-      date: differenceBetweenNow(post.date),
-      authorName: userMap[post.authorId]?.name,
-    })
-  );
+  return [...state.blog.posts]
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .map(
+      (post): ViewPost => ({
+        ...post,
+        date: differenceBetweenNow(post.date),
+        authorName: userMap[post.authorId]?.name,
+      })
+    );
 };
 
 export const selectPostId = (id: string) => (state: AppState) => {
