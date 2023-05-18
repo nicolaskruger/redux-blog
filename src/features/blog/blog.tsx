@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useState } from "react";
 import {
   Post,
   ViewPost,
+  addPost,
   fetchPost,
   post,
   react,
@@ -10,12 +11,16 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import Link from "next/link";
 import { fetchUsers, selectUsers } from "../user/userSlicer";
-import { AppState } from "../../store";
+import { AppState, useAppDispatch } from "../../store";
 
 export const Blog = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [author, setAuthor] = useState("0");
+
+  const [addUserState, setAddUserState] = useState<
+    "idle" | "error" | "success" | "loading"
+  >("idle");
 
   const postList = useSelector(selectPost);
 
@@ -25,21 +30,29 @@ export const Blog = () => {
 
   const userState = useSelector((state: AppState) => state.user.state);
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     dispatch(fetchPost());
     dispatch(fetchUsers());
   }, []);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     event.stopPropagation();
-    if (title && content && author) {
-      dispatch(post({ title, content, authorId: author }));
-      setTitle("");
-      setContent("");
-      setAuthor("0");
+    if ([title, content, author].every(Boolean)) {
+      try {
+        setAddUserState("loading");
+        await dispatch(addPost({ title, content, authorId: author })).unwrap();
+        setAddUserState("success");
+        setTimeout(() => setAddUserState("idle"), 1000);
+        setTitle("");
+        setContent("");
+        setAuthor("0");
+      } catch {
+        setAddUserState("error");
+        setTimeout(() => setAddUserState("idle"), 1000);
+      }
     }
   };
 
@@ -106,6 +119,7 @@ export const Blog = () => {
           ))}
         </select>
         <button>post</button>
+        {addUserState !== "idle" && <p>{addUserState}</p>}
       </form>
       <ul>{postList.map(renderPost)}</ul>
     </div>
