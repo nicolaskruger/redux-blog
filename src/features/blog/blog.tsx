@@ -9,7 +9,7 @@ import {
 } from "./blogSlice";
 import { useDispatch, useSelector } from "react-redux";
 import Link from "next/link";
-import { selectUsers } from "../user/userSlicer";
+import { fetchUsers, selectUsers } from "../user/userSlicer";
 import { AppState } from "../../store";
 
 export const Blog = () => {
@@ -23,10 +23,13 @@ export const Blog = () => {
 
   const users = useSelector(selectUsers);
 
+  const userState = useSelector((state: AppState) => state.user.state);
+
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(fetchPost());
+    dispatch(fetchUsers());
   }, []);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -55,7 +58,7 @@ export const Blog = () => {
       <li key={title}>
         <h1>{title}</h1>
         <h2>
-          by {author} {date}
+          by {userState !== "success" ? userState : author} {date}
         </h2>
         <p>{content}</p>
         <Link href={`/view/${id}`}>view</Link>
