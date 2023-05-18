@@ -35,7 +35,7 @@ const initialState: Blog = {
   posts: [],
 };
 
-type AddPost = Pick<Post, "title" | "authorId" | "content">;
+export type AddPost = Pick<Post, "title" | "authorId" | "content">;
 
 type EditPost = Pick<Post, "id" | "title" | "content">;
 
@@ -48,6 +48,14 @@ export const fetchPost = createAsyncThunk("blog/fetchPost", async () => {
   const response = await axios.get<Post[]>("/api/post");
   return response.data;
 });
+
+export const addPost = createAsyncThunk(
+  "blog/addPost",
+  async (newPost: AddPost) => {
+    const response = await axios.post<Post>("/api/post", newPost);
+    return response.data;
+  }
+);
 
 const blogSlicer = createSlice({
   name: "blog",
@@ -107,6 +115,12 @@ const blogSlicer = createSlice({
       })
       .addCase(fetchPost.rejected, (state) => {
         state.state = "fail";
+      })
+      .addCase(addPost.fulfilled, (state, action) => {
+        return {
+          ...state,
+          posts: [...state.posts, action.payload],
+        };
       });
   },
 });
