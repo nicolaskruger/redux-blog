@@ -1,7 +1,13 @@
-import { PayloadAction, createSlice, nanoid } from "@reduxjs/toolkit";
+import {
+  PayloadAction,
+  createAsyncThunk,
+  createSlice,
+  nanoid,
+} from "@reduxjs/toolkit";
 import { AppState } from "../../store";
 import { selectUserById, selectUserMap } from "../user/userSlicer";
 import { parseISO, formatDistanceToNow } from "date-fns";
+import axios from "axios";
 
 export type Post = {
   id: string;
@@ -20,34 +26,13 @@ export type ViewPost = Omit<Post, "authorId"> & {
 };
 
 type Blog = {
+  state: "loading" | "success" | "fail";
   posts: Post[];
 };
 
 const initialState: Blog = {
-  posts: [
-    {
-      id: "1",
-      title: "naruto",
-      content: "rasengan",
-      like: 0,
-      joy: 0,
-      look: 0,
-      rocket: 0,
-      authorId: "0",
-      date: new Date(new Date().getTime() - 5 * 60000).toISOString(),
-    },
-    {
-      id: "2",
-      title: "sasuke",
-      content: "shidory",
-      like: 0,
-      joy: 0,
-      look: 0,
-      rocket: 0,
-      authorId: "1",
-      date: new Date(new Date().getTime() - 10 * 60000).toISOString(),
-    },
-  ],
+  state: "loading",
+  posts: [],
 };
 
 type AddPost = Pick<Post, "title" | "authorId" | "content">;
@@ -58,6 +43,11 @@ type ReactPost = {
   id: string;
   reaction: keyof Pick<Post, "joy" | "like" | "rocket" | "look">;
 };
+
+export const fetchPost = createAsyncThunk("blog/fetchPost", async () => {
+  const response = await axios.get<Post[]>("/api/post");
+  return response.data;
+});
 
 const blogSlicer = createSlice({
   name: "blog",
@@ -105,6 +95,19 @@ const blogSlicer = createSlice({
         return post;
       });
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchPost.pending, (state) => {
+        state.state = "loading";
+      })
+      .addCase(fetchPost.fulfilled, (state, action) => {
+        state.posts = action.payload;
+        state.state = "success";
+      })
+      .addCase(fetchPost.rejected, (state) => {
+        state.state = "fail";
+      });
   },
 });
 

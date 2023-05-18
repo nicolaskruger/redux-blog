@@ -1,8 +1,16 @@
-import { FormEvent, useState } from "react";
-import { Post, ViewPost, post, react, selectPost } from "./blogSlice";
+import { FormEvent, useEffect, useState } from "react";
+import {
+  Post,
+  ViewPost,
+  fetchPost,
+  post,
+  react,
+  selectPost,
+} from "./blogSlice";
 import { useDispatch, useSelector } from "react-redux";
 import Link from "next/link";
 import { selectUsers } from "../user/userSlicer";
+import { AppState } from "../../store";
 
 export const Blog = () => {
   const [title, setTitle] = useState("");
@@ -11,9 +19,15 @@ export const Blog = () => {
 
   const postList = useSelector(selectPost);
 
+  const state = useSelector((state: AppState) => state.blog.state);
+
   const users = useSelector(selectUsers);
 
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchPost());
+  }, []);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -58,6 +72,7 @@ export const Blog = () => {
     );
   };
 
+  if (state !== "success") return <p>{state}</p>;
   return (
     <div>
       <form onSubmit={handleSubmit}>
