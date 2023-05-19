@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Link from "next/link";
 import { fetchUsers, selectUsers } from "../user/userSlicer";
 import { AppState, useAppDispatch } from "../../store";
+import { Reactions } from "../../components/reactions";
 
 export const Blog = () => {
   const [title, setTitle] = useState("");
@@ -57,16 +58,12 @@ export const Blog = () => {
   };
 
   const renderPost = ({
-    id,
     content,
     title,
     authorName: author,
     date,
     ...post
   }: ViewPost) => {
-    const reactions: (keyof Pick<Post, "joy" | "like" | "look" | "rocket">)[] =
-      ["joy", "like", "look", "rocket"];
-
     return (
       <li key={title}>
         <h1>{title}</h1>
@@ -74,16 +71,8 @@ export const Blog = () => {
           by {userState !== "success" ? userState : author} {date}
         </h2>
         <p>{content}</p>
-        <Link href={`/view/${id}`}>view</Link>
-        <ul>
-          {reactions.map((reaction) => (
-            <li>
-              <button onClick={() => dispatch(react({ id, reaction }))}>
-                {reaction} : {post[reaction]}
-              </button>
-            </li>
-          ))}
-        </ul>
+        <Link href={`/view/${post.id}`}>view</Link>
+        <Reactions {...post} />
       </li>
     );
   };

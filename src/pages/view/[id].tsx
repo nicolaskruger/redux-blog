@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { Post, react, selectPostId } from "../../features/blog/blogSlice";
 import { useDispatch, useSelector } from "react-redux";
 import Link from "next/link";
+import { Reactions } from "../../components/reactions";
 
 type ViewProps = {
   id: string;
@@ -36,15 +37,7 @@ const View: NextPage<ViewProps> = ({ id }) => {
           by {author} {date}
         </h2>
         <p>{content}</p>
-        <ul>
-          {reactions.map((reaction) => (
-            <li>
-              <button onClick={() => dispatch(react({ id, reaction }))}>
-                {reaction} : {post[reaction]}
-              </button>
-            </li>
-          ))}
-        </ul>
+        <Reactions {...post} />
         <Link href={`/edit/${id}`}>edit</Link>
       </div>
     );
