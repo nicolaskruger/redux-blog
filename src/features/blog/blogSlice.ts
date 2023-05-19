@@ -159,4 +159,15 @@ export const selectPostId = (id: string) => (state: AppState) => {
 
   return postView;
 };
+
+export const selectPostByAuthorId = (id: string) => (state: AppState) => {
+  const posts = state.blog.posts.filter((post) => post.authorId === id);
+  return posts.map(
+    (post): Omit<ViewPost, "authorName"> => ({
+      ...post,
+      date: differenceBetweenNow(post.date),
+    })
+  );
+};
+
 export default blogSlicer.reducer;
