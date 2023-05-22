@@ -6,12 +6,14 @@ import { add, subDays } from "date-fns";
 export type Notify = {
   info: string;
   date: string;
+  userId: string;
 };
 
 const initialState: Notify[] = [
   {
     info: "first msg",
     date: subDays(new Date(), 12).toISOString(),
+    userId: "0",
   },
 ];
 

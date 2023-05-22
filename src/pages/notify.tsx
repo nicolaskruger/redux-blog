@@ -5,9 +5,12 @@ import {
   selectNotify,
 } from "../features/notification/notificationSlicer";
 import { useEffect, useState } from "react";
+import { fetchUsers, selectUserMap } from "../features/user/userSlicer";
 
 const NotifyPage = () => {
   const [notify, setNotify] = useState<Notify[]>([]);
+
+  const userMap = useSelector(selectUserMap);
 
   const currentNotify = useSelector(selectNotify);
 
@@ -18,16 +21,21 @@ const NotifyPage = () => {
   };
 
   useEffect(() => {
+    dispatch(fetchUsers());
+  }, []);
+
+  useEffect(() => {
     setNotify(currentNotify);
   }, [currentNotify]);
 
   return (
     <div>
       <ul>
-        {notify.map(({ date, info }) => (
+        {notify.map(({ date, info, userId }) => (
           <li key={Math.random()}>
             <h2>info: {info}</h2>
             <p>date: {date}</p>
+            <p>user: {userMap[userId].name}</p>
           </li>
         ))}
       </ul>
