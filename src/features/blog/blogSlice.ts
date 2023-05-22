@@ -1,6 +1,7 @@
 import {
   PayloadAction,
   createAsyncThunk,
+  createSelector,
   createSlice,
   nanoid,
 } from "@reduxjs/toolkit";
@@ -169,5 +170,22 @@ export const selectPostByAuthorId = (id: string) => (state: AppState) => {
     })
   );
 };
+
+export const selectPostByUser = createSelector(
+  [
+    (state: AppState) => state.blog.posts,
+    (state: AppState, userId: string) => userId,
+    selectUserMap,
+  ],
+  (posts, userId, user) =>
+    posts
+      .filter((post) => post.authorId === userId)
+      .map(
+        (post): ViewPost => ({
+          ...post,
+          authorName: user[userId].name,
+        })
+      )
+);
 
 export default blogSlicer.reducer;

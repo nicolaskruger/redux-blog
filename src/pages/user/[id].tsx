@@ -1,9 +1,14 @@
 import { GetServerSideProps } from "next";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchPost, selectPostByAuthorId } from "../../features/blog/blogSlice";
+import {
+  fetchPost,
+  selectPostByAuthorId,
+  selectPostByUser,
+} from "../../features/blog/blogSlice";
 import { fetchUsers, selectUserById } from "../../features/user/userSlicer";
 import { Reactions } from "../../components/reactions";
+import { AppState } from "../../store";
 
 type UserProps = {
   id: string;
@@ -14,7 +19,7 @@ const UserPage = ({ id }: UserProps) => {
 
   const user = useSelector(selectUserById(id));
 
-  const posts = useSelector(selectPostByAuthorId(id));
+  const posts = useSelector((state: AppState) => selectPostByUser(state, id));
 
   useEffect(() => {
     dispatch(fetchPost());
