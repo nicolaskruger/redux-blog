@@ -57,3 +57,6 @@ export const { readAllNotification } = notifySlicer.actions;
 export default notifySlicer.reducer;
 
 export const selectNotify = (state: AppState) => state.notify;
+
+export const selectCountNotificationToRead = (state: AppState) =>
+  state.notify.filter(({ read }) => !read).length;

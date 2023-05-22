@@ -37,7 +37,7 @@ const NotifyPage = () => {
           <li key={Math.random()}>
             <h2>info: {info}</h2>
             <p>date: {date}</p>
-            <p>user: {userMap[userId].name}</p>
+            <p>user: {userMap[userId]?.name}</p>
             <p>read: {read ? "OK" : "NOK"}</p>
           </li>
         ))}
