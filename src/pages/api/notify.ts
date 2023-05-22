@@ -9,6 +9,7 @@ const generateRandomNotify = (): Notify => {
     info: infos[Math.floor(Math.random() * infos.length)],
     date: subDays(new Date(), 10 * Math.random()).toISOString(),
     userId: Math.floor(Math.random() * 4).toString(),
+    read: false,
   };
 };
 

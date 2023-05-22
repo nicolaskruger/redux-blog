@@ -2,6 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   Notify,
   fetchLastNotify,
+  readAllNotification,
   selectNotify,
 } from "../features/notification/notificationSlicer";
 import { useEffect, useState } from "react";
@@ -30,12 +31,14 @@ const NotifyPage = () => {
 
   return (
     <div>
+      <button onClick={() => dispatch(readAllNotification())}>read all</button>
       <ul>
-        {notify.map(({ date, info, userId }) => (
+        {notify.map(({ date, info, userId, read }) => (
           <li key={Math.random()}>
             <h2>info: {info}</h2>
             <p>date: {date}</p>
             <p>user: {userMap[userId].name}</p>
+            <p>read: {read ? "OK" : "NOK"}</p>
           </li>
         ))}
       </ul>

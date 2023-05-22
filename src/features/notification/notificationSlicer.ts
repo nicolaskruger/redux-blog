@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { AppState } from "../../store";
 import axios from "axios";
 import { add, subDays } from "date-fns";
@@ -7,6 +7,7 @@ export type Notify = {
   info: string;
   date: string;
   userId: string;
+  read: boolean;
 };
 
 const initialState: Notify[] = [
@@ -14,6 +15,7 @@ const initialState: Notify[] = [
     info: "first msg",
     date: subDays(new Date(), 12).toISOString(),
     userId: "0",
+    read: true,
   },
 ];
 
@@ -36,7 +38,11 @@ export const fetchLastNotify = createAsyncThunk(
 const notifySlicer = createSlice({
   name: "notify",
   initialState,
-  reducers: {},
+  reducers: {
+    readAllNotification: (state) => {
+      return state.map((v) => ({ ...v, read: true }));
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(fetchLastNotify.fulfilled, (state, action) => {
       return [...state, ...action.payload].sort((a, b) =>
@@ -45,6 +51,8 @@ const notifySlicer = createSlice({
     });
   },
 });
+
+export const { readAllNotification } = notifySlicer.actions;
 
 export default notifySlicer.reducer;
 
