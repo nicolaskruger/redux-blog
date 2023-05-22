@@ -3,11 +3,17 @@ import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
 import counterReducer from "./features/counter/counterSlice";
 import blogReducer from "./features/blog/blogSlice";
 import userReducer from "./features/user/userSlicer";
+import notifyReducer from "./features/notification/notificationSlicer";
 import { useDispatch } from "react-redux";
 
 export function makeStore() {
   return configureStore({
-    reducer: { counter: counterReducer, blog: blogReducer, user: userReducer },
+    reducer: {
+      counter: counterReducer,
+      blog: blogReducer,
+      user: userReducer,
+      notify: notifyReducer,
+    },
   });
 }
 
