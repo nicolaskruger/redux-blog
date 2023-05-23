@@ -1,4 +1,9 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import {
+  EntityState,
+  createAsyncThunk,
+  createEntityAdapter,
+  createSlice,
+} from "@reduxjs/toolkit";
 import { AppState } from "../../store";
 import axios from "axios";
 
@@ -7,11 +12,19 @@ type User = {
   id: string;
 };
 
-type UserState = { users: User[]; state: "loading" | "success" | "fail" };
+type UserState = {
+  users: EntityState<User>;
+  state: "loading" | "success" | "fail";
+};
+
+const userAdapter = createEntityAdapter<User>({
+  selectId: ({ id }) => id,
+  sortComparer: (a, b) => b.name.localeCompare(a.name),
+});
 
 const initialState: UserState = {
   state: "loading",
-  users: [],
+  users: userAdapter.getInitialState(),
 };
 
 export const fetchUsers = createAsyncThunk("user/fetchUsers", async () => {
@@ -30,7 +43,7 @@ export const userSlicer = createSlice({
       })
       .addCase(fetchUsers.fulfilled, (state, action) => {
         state.state = "success";
-        state.users = action.payload;
+        userAdapter.addMany(state.users, action.payload);
       })
       .addCase(fetchUsers.rejected, (state) => {
         state.state = "fail";
@@ -38,14 +51,13 @@ export const userSlicer = createSlice({
   },
 });
 
-export const selectUsers = (state: AppState) => state.user.users;
+export const userSelector = userAdapter.getSelectors<AppState>(
+  (state) => state.user.users
+);
 
-export const selectUserMap = (state: AppState) =>
-  state.user.users.reduce((acc, curr) => {
-    return { ...acc, [curr.id]: curr };
-  }, {} as { [key: string]: User });
+export const selectUsers = (state: AppState) => userSelector.selectAll(state);
 
 export const selectUserById = (id: string) => (state: AppState) =>
-  state.user.users.find((user) => user.id === id);
+  userSelector.selectById(state, id);
 
 export default userSlicer.reducer;

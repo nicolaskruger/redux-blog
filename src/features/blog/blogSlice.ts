@@ -8,7 +8,7 @@ import {
   nanoid,
 } from "@reduxjs/toolkit";
 import { AppState } from "../../store";
-import { selectUserById, selectUserMap } from "../user/userSlicer";
+import { selectUserById, userSelector } from "../user/userSlicer";
 import { parseISO, formatDistanceToNow } from "date-fns";
 import axios from "axios";
 
@@ -137,8 +137,6 @@ const differenceBetweenNow = (timestamp: string) => {
   return `${formatDistanceToNow(date)} ago`;
 };
 export const selectPost = (state: AppState) => {
-  const userMap = selectUserMap(state);
-
   return postsSelector
     .selectAll(state)
     .sort((a, b) => b.date.localeCompare(a.date))
@@ -146,7 +144,7 @@ export const selectPost = (state: AppState) => {
       (post): ViewPost => ({
         ...post,
         date: differenceBetweenNow(post.date),
-        authorName: userMap[post.authorId]?.name,
+        authorName: userSelector.selectById(state, post.authorId)!.name,
       })
     );
 };
@@ -180,16 +178,15 @@ export const selectPostByAuthorId = (id: string) => (state: AppState) => {
 export const selectPostByUser = createSelector(
   [
     (state: AppState) => postsSelector.selectAll(state),
-    (state: AppState, userId: string) => userId,
-    selectUserMap,
+    (state: AppState, userId: string) => userSelector.selectById(state, userId),
   ],
-  (posts, userId, user) =>
+  (posts, user) =>
     posts
-      .filter((post) => post.authorId === userId)
+      .filter((post) => post.authorId === user?.id)
       .map(
         (post): ViewPost => ({
           ...post,
-          authorName: user[userId]?.name,
+          authorName: user!.name,
         })
       )
 );
