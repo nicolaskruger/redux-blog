@@ -1,6 +1,8 @@
 import {
+  EntityState,
   PayloadAction,
   createAsyncThunk,
+  createEntityAdapter,
   createSelector,
   createSlice,
   nanoid,
@@ -28,12 +30,17 @@ export type ViewPost = Omit<Post, "authorId"> & {
 
 type Blog = {
   state: "loading" | "success" | "fail";
-  posts: Post[];
+  posts: EntityState<Post>;
 };
+
+const blogAdapter = createEntityAdapter<Post>({
+  selectId: (a) => a.id,
+  sortComparer: (a, b) => b.date.localeCompare(a.date),
+});
 
 const initialState: Blog = {
   state: "loading",
-  posts: [],
+  posts: blogAdapter.getInitialState(),
 };
 
 export type AddPost = Pick<Post, "title" | "authorId" | "content">;
@@ -64,7 +71,7 @@ const blogSlicer = createSlice({
   reducers: {
     post: {
       reducer: (state, action: PayloadAction<Post>) => {
-        state.posts.push(action.payload);
+        blogAdapter.addOne(state.posts, action.payload);
       },
       prepare: (post: AddPost): { payload: Post } => {
         return {
@@ -83,26 +90,21 @@ const blogSlicer = createSlice({
     edit: (state, action: PayloadAction<EditPost>) => {
       const { id, ...newPost } = action.payload;
 
-      state.posts = state.posts.map((post) => {
-        if (post.id === id)
-          return {
-            ...post,
-            ...newPost,
-          };
-        return post;
-      });
+      const existsEntity = state.posts.entities[id];
+
+      if (existsEntity) {
+        existsEntity.title = newPost.title;
+        existsEntity.content = newPost.content;
+      }
     },
     react: (state, action: PayloadAction<ReactPost>) => {
       const { id, reaction } = action.payload;
 
-      state.posts = state.posts.map((post) => {
-        if (post.id === id)
-          return {
-            ...post,
-            [reaction]: post[reaction] + 1,
-          };
-        return post;
-      });
+      const existsEntity = state.posts.entities[id];
+
+      if (existsEntity) {
+        existsEntity[reaction]++;
+      }
     },
   },
   extraReducers: (builder) => {
@@ -111,22 +113,23 @@ const blogSlicer = createSlice({
         state.state = "loading";
       })
       .addCase(fetchPost.fulfilled, (state, action) => {
-        state.posts = action.payload;
+        blogAdapter.addMany(state.posts, action.payload);
         state.state = "success";
       })
       .addCase(fetchPost.rejected, (state) => {
         state.state = "fail";
       })
       .addCase(addPost.fulfilled, (state, action) => {
-        return {
-          ...state,
-          posts: [...state.posts, action.payload],
-        };
+        blogAdapter.addOne(state.posts, action.payload);
       });
   },
 });
 
 export const { post, edit, react } = blogSlicer.actions;
+
+const postsSelector = blogAdapter.getSelectors<AppState>(
+  (state) => state.blog.posts
+);
 
 const differenceBetweenNow = (timestamp: string) => {
   const date = parseISO(timestamp);
@@ -136,7 +139,8 @@ const differenceBetweenNow = (timestamp: string) => {
 export const selectPost = (state: AppState) => {
   const userMap = selectUserMap(state);
 
-  return [...state.blog.posts]
+  return postsSelector
+    .selectAll(state)
     .sort((a, b) => b.date.localeCompare(a.date))
     .map(
       (post): ViewPost => ({
@@ -148,7 +152,7 @@ export const selectPost = (state: AppState) => {
 };
 
 export const selectPostId = (id: string) => (state: AppState) => {
-  const post = state.blog.posts.find((post) => post.id === id);
+  const post = postsSelector.selectById(state, id);
 
   if (!post) return null;
 
@@ -162,7 +166,9 @@ export const selectPostId = (id: string) => (state: AppState) => {
 };
 
 export const selectPostByAuthorId = (id: string) => (state: AppState) => {
-  const posts = state.blog.posts.filter((post) => post.authorId === id);
+  const posts = postsSelector
+    .selectAll(state)
+    .filter((post) => post.authorId === id);
   return posts.map(
     (post): Omit<ViewPost, "authorName"> => ({
       ...post,
@@ -173,7 +179,7 @@ export const selectPostByAuthorId = (id: string) => (state: AppState) => {
 
 export const selectPostByUser = createSelector(
   [
-    (state: AppState) => state.blog.posts,
+    (state: AppState) => postsSelector.selectAll(state),
     (state: AppState, userId: string) => userId,
     selectUserMap,
   ],
@@ -183,7 +189,7 @@ export const selectPostByUser = createSelector(
       .map(
         (post): ViewPost => ({
           ...post,
-          authorName: user[userId].name,
+          authorName: user[userId]?.name,
         })
       )
 );
