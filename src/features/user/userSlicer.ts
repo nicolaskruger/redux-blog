@@ -55,6 +55,8 @@ export const userSelector = userAdapter.getSelectors<AppState>(
   (state) => state.user.users
 );
 
+export const selectUserMap = (state: AppState) => state.user.users.entities;
+
 export const selectUsers = (state: AppState) => userSelector.selectAll(state);
 
 export const selectUserById = (id: string) => (state: AppState) =>
