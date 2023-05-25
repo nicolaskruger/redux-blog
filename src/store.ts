@@ -1,10 +1,16 @@
-import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
+import {
+  configureStore,
+  ThunkAction,
+  Action,
+  getDefaultMiddleware,
+} from "@reduxjs/toolkit";
 
 import counterReducer from "./features/counter/counterSlice";
 import blogReducer from "./features/blog/blogSlice";
 import userReducer from "./features/user/userSlicer";
 import notifyReducer from "./features/notification/notificationSlicer";
 import { useDispatch } from "react-redux";
+import { apiSlice } from "./features/api/apiSlicer";
 
 export function makeStore() {
   return configureStore({
@@ -13,7 +19,10 @@ export function makeStore() {
       blog: blogReducer,
       user: userReducer,
       notify: notifyReducer,
+      [apiSlice.reducerPath]: apiSlice.reducer,
     },
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware().concat(apiSlice.middleware),
   });
 }
 

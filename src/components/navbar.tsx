@@ -19,6 +19,10 @@ export const NavBar = ({ children }: NavBarProps) => {
       name: "user",
       link: "/user",
     },
+    {
+      name: "rtkPost",
+      link: "/rtkPost",
+    },
   ];
 
   return (
